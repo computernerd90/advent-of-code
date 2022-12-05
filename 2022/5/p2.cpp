@@ -42,10 +42,8 @@ int main(int argc, char** argv) {
 
             sscanf(inLine, "move %d from %d to %d", &numMove, &src, &dest);
 
-            for(int i=0; i<numMove; i++) {
-                vStacks[dest-1].push_back(*(vStacks[src-1].end()-1));
-                vStacks[src-1].erase(vStacks[src-1].end()-1);
-            }
+            std::copy(std::end(vStacks[src-1])-numMove, std::end(vStacks[src-1]), std::back_inserter(vStacks[dest-1]));
+            vStacks[src-1].erase(vStacks[src-1].end()-numMove, vStacks[src-1].end());
         }
     }
 
