@@ -30,50 +30,30 @@ int main(int argc, char** argv) {
         for(int j=1,jSize=vTrees[i].size()-1; j < jSize; j++) {
             int up=0,down=0,left=0,right=0;
             for(int k=j-1; k>=0; k--) {
-                printf("a");
-                if(j != 0) {
-                    left++;
-                    if(vTrees[i][k] >= vTrees[i][j]) {
-                        break;
-                    }
-                }
+                left++;
+                if(vTrees[i][k] >= vTrees[i][j])
+                    break;
             }
 
-            printf("\n");
             for(int k=j+1; k<vTrees[i].size(); k++) {
-                printf("b");
-                if(j != vTrees[i].size()-1) {
-                    right++;
-                    if(vTrees[i][k] >= vTrees[i][j]) {
-                        break;
-                    }
-                }
+                right++;
+                if(vTrees[i][k] >= vTrees[i][j]) 
+                    break;
             }
 
-            printf("\n");
             for(int k=i-1; k>=0; k--) {
-                printf("c");
-                if(i != 0) {
-                    up++;
-                    if(vTrees[k][j] >= vTrees[i][j]) {
-                        break;
-                    }
-                }
+                up++;
+                if(vTrees[k][j] >= vTrees[i][j]) 
+                    break;
             }
 
-            printf("\n");
             for(int k=i+1; k<vTrees.size(); k++) {
-                printf("d");
-                if(i != vTrees.size()-1) {
-                    down++;
-                    if(vTrees[k][j] >= vTrees[i][j]) {
-                        break;
-                    }
-                }
+                down++;
+                if(vTrees[k][j] >= vTrees[i][j]) 
+                    break;
             }
-            printf("\n");
 
-            score = score > up*down*left*right ? up*down*left*right : score;
+            score = score > up*down*left*right ? score : up*down*left*right;
         }
     }
 
