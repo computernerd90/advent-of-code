@@ -14,7 +14,7 @@ struct Node {
     std::weak_ptr<Node> parent;
 };
 
-int recurse_tree(std::shared_ptr<Node>& node, std::vector<int>& vSizes) {
+int recurse_tree(std::shared_ptr<Node>& node, std::vector<int>& vSizes, int cap) {
     int size = std::accumulate(std::begin(node->vFiles), std::end(node->vFiles),
         0,[] (int lhs, std::pair<std::string,int> prFile) {
             return lhs + prFile.second;
@@ -22,10 +22,10 @@ int recurse_tree(std::shared_ptr<Node>& node, std::vector<int>& vSizes) {
     if(node->vNodes.size() != 0) {
         for(auto itr = std::begin(node->vNodes), endItr = std::end(node->vNodes);
             itr != endItr; ++itr)
-            size += recurse_tree(*itr, vSizes);
+            size += recurse_tree(*itr, vSizes, cap);
     }
 
-    if(size <= 100000)
+    if(size >= cap)
         vSizes.emplace_back(size);
 
     return size;
@@ -92,9 +92,12 @@ int main(int argc, char** argv) {
     }
 
     std::vector<int> vSizes;
-    recurse_tree(root, vSizes);
+    int used_space = recurse_tree(root, vSizes, 0);
+    vSizes.clear();
+    recurse_tree(root, vSizes, 30000000-(70000000-used_space));
     int total = std::accumulate(std::begin(vSizes), std::end(vSizes), 0);
 
-    printf("Total: %d\n", total);
+    std::sort(std::begin(vSizes), std::end(vSizes));
+    printf("Smalles: %d\n", vSizes[0]);
     return 0;
 }
