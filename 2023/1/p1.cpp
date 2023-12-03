@@ -11,12 +11,11 @@ int main(int argc, char** argv) {
     while(fgets(line, sizeof(line), fInput)) {
         firstDigit = -1;
         secondDigit = -1;
-        for(int i=0, iSize=sizeof(line); i < iSize; i++) {
-
-            printf("char is %c, integer value shifted down 48 is %d.\n", line[i], line[i]-48);
-
+        for(int i=0; line[i] != '\n'; i++) {
+            if(line[i] == ' ' || line[i] == '\n')
+                continue;
             line[i] -= 48;
-            if(line[i] >= 0 && line[i] <= 8) {
+            if(line[i] >= 0 && line[i] <= 9) {
                 if(firstDigit == -1) {
                     firstDigit = line[i];
                 }
@@ -26,11 +25,12 @@ int main(int argc, char** argv) {
             }
         }
 
+        
         if(secondDigit == -1) {
             secondDigit = firstDigit;
         }
 
-        printf("Number is %d%d\n", firstDigit,secondDigit);
+        printf("%d%d\n", firstDigit, secondDigit);
 
         result += 10*firstDigit + secondDigit;
     }
