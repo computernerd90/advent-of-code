@@ -86,49 +86,21 @@ int main(int argc, char** argv) {
             for(size_t k=startCol,kSize=endCol+1; k<kSize; k++) {
                 if(isDigit(vTable[j][k])) {
                     auto itrNum = std::find_if(std::begin(vNums), std::end(vNums), [j,k] (std::tuple<int,int,int> num) {
-                        return std::get<0>(num) == j && (std::get<1>(num) >= k & std::get<2>(num) <= k);
+                        return std::get<0>(num) == j && (std::get<1>(num) <= k && std::get<2>(num) >= k);
                     });
-                    if(itrNum == std::end(vNums))
-                        fmt::print("shouldn't be here\n");
                     vCandidates.emplace_back(*itrNum);
                 }
             }
         }
  
-        fmt::print("vCandidates size() before removal: {}\n", vCandidates.size());
-        printCandidates(vCandidates);
         removeDups(vCandidates);
-        printCandidates(vCandidates);
-        fmt::print("vCandidates size() after removal: {}\n", vCandidates.size());
-
-        /*
-        size_t startRow=std::get<0>(vNums[i]), endRow=std::get<0>(vNums[i]);
-        if(startRow != 0)
-            startRow -= 1;
-        if(endRow != vTable.size()-1)
-            endRow += 1;
-
-        size_t startCol=std::get<1>(vNums[i]),endCol=std::get<2>(vNums[i]);
-        if(startCol != 0)
-            startCol -= 1;
-        if(endCol != vTable[0].size()-1)
-            endCol += 1;
-        bool invalidNum = true;
-        for(size_t j=startRow,jSize=endRow+1; j<jSize; j++) {
-            for(size_t k=startCol,kSize=endCol+1; k<kSize; k++) {
-                if(vTable[j][k] != '.' && !isDigit(vTable[j][k])) {
-                    invalidNum = false;
-                    j = jSize;
-                    k = kSize;
-                    break;
-                }
-            }
-        }
-        if(!invalidNum) {
-            std::string strNum(vTable[std::get<0>(vNums[i])], std::get<1>(vNums[i]), std::get<2>(vNums[i])-std::get<1>(vNums[i])+1);
-            fmt::print("Valid num: {}\n", strNum);
-            sum += boost::lexical_cast<int>(strNum);
-        }*/
+        if(vCandidates.size() > 1)
+            sum += boost::lexical_cast<int>(std::string(vTable[std::get<0>(vCandidates[0])],
+                        std::get<1>(vCandidates[0]),
+                        std::get<2>(vCandidates[0]) - std::get<1>(vCandidates[0]) + 1))
+                * boost::lexical_cast<int>(std::string(vTable[std::get<0>(vCandidates[1])],
+                        std::get<1>(vCandidates[1]),
+                        std::get<2>(vCandidates[1]) - std::get<1>(vCandidates[1]) + 1));
     }
 
     fmt::print("Sum is {}.\n", sum);
