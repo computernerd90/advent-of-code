@@ -68,12 +68,21 @@ int main(int argc, char** argv) {
     }
 
     for(size_t i=0, iSize=vScores.size(); i < iSize; i++) {
-        for(size_t j=0, jSize=std::get<1>(vScores[i]).size(); j<jSize; j++) {
-            if(std::get<1>(vScores[i])[j] < iSize)
-                std::get<2>(vScores[std::get<1>(vScores[i])[j]]) += std::get<2>(vScores[i]) + 1;
-        }
-        if(std::get<1>(vScores[i]).size() != 0)
+        if(std::get<1>(vScores[i]).size() > 0) {
+            fmt::print("Card {}, ", i+1);
+
+            if(std::get<1>(vScores[i]).size() > 0)
+                fmt::print("Winning numbers: ");
+            for(size_t j=0, jSize=std::get<1>(vScores[i]).size(); j<jSize; j++) {
+                if(std::get<1>(vScores[i])[j]+i < iSize) {
+                    fmt::print("{}, ", std::get<1>(vScores[i])[j]);
+                    std::get<2>(vScores[std::get<1>(vScores[i])[j]+i]) += std::get<2>(vScores[i]) + 1;
+                }
+            }
+            fmt::print("Instances: {}", std::get<2>(vScores[i])+1);
             sum += std::get<2>(vScores[i])+1;
+            fmt::print(", Sum so far: {}\n", sum);
+        }
     }
 
     fmt::print("Sum total: {}\n", sum);
