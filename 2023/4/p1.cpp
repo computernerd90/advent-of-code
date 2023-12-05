@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
         vCards.emplace_back(strLine);
     }
 
-    std::regex regLine("Card (\\d+)\\: (.*) \\| (.*)");
+    std::regex regLine("Card +(\\d+)\\: (.*) \\| (.*)");
     std::smatch matches;
 
     int sum=0;
@@ -52,19 +52,34 @@ int main(int argc, char** argv) {
         auto winningNumsEnd=std::end(vWinningNums);
 
         int exponent=-1;
+        int winningNums = 0;
 
+        fmt::print("Winning nums: ");
+        for(auto itr=vWinningNums.begin(), itrEnd=vWinningNums.end(); itr != itrEnd; ++itr)
+            fmt::print("{}, ", *itr);
+        fmt::print("\n");
+
+        fmt::print("Actual nums: ");
+        for(auto itr=vNums.begin(), itrEnd=vNums.end(); itr != itrEnd; ++itr)
+            fmt::print("{}, ", *itr);
+        fmt::print("\n");
+        
         for(auto itr=vNums.begin(), itrEnd=vNums.end(); itr != itrEnd; ++itr) {
-            if(std::find(winningNumsBegin, winningNumsEnd, *itr) != winningNumsEnd)
+            if(std::find(winningNumsBegin, winningNumsEnd, *itr) != winningNumsEnd) {
                 exponent++;
+                winningNums++;
+            }
         }
         
         if(exponent >= 0) {
             sum += pow(2, exponent);
         }
 
-        fmt::print("Sum so far: {}\n", sum);
 
-        fmt::print("\n\n");
+
+        fmt::print("Winning nums: {}, Sum so far: {}\n", winningNums, sum);
+
+        fmt::print("\n");
     }
 
     fmt::print("Sum total: {}\n", sum);
