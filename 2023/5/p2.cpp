@@ -62,15 +62,18 @@ int main(int argc, char** argv) {
     for(int i=0; i<2; i++)
         fgets(line, sizeof(line), fInput);
 
-    std::regex regSeeds("\\d+");
+    std::regex regSeeds("(\\d+) (\\d+)");
     std::smatch matchSeeds;
     
     auto regItrBegin = std::sregex_iterator(strLine.begin(), strLine.end(), regSeeds);
     auto regItrEnd = std::sregex_iterator();
 
-    std::vector<int64_t> vSeeds;
-    for(std::regex_iterator regItr=regItrBegin; regItr != regItrEnd; ++regItr)
-        vSeeds.emplace_back(boost::lexical_cast<int64_t>(regItr->str()));
+    std::vector<std::tuple<int64_t, int64_t>> vSeedRanges;
+    for(std::regex_iterator regItr=regItrBegin; regItr != regItrEnd; ++regItr) {
+        int64_t start = boost::lexical_cast<int64_t>(regItr->str(1));
+        int64_t range = boost::lexical_cast<int64_t>(regItr->str(2));
+        vSeedRanges.emplace_back(std::make_tuple(start,range));
+    }
 
     std::vector<std::tuple<int64_t,int64_t,int64_t>> vSeedSoil;
     std::vector<std::tuple<int64_t,int64_t,int64_t>> vSoilFert;
@@ -95,8 +98,25 @@ int main(int argc, char** argv) {
     parseTuples(fInput, vHumidLoc);
 
     int64_t loc = LLONG_MAX;
-    for(auto itr=vSeeds.begin(), itrEnd=vSeeds.end(); itr != itrEnd; ++itr) {
-        int64_t key=*itr;
+    for(auto itr=vSeedRanges.begin(), itrEnd=vSeedRanges.end(); itr != itrEnd; ++itr) {
+        int64_t start=std::get<0>(*itr);
+        int64_t range=std::get<1>(*itr);
+
+        fmt::print("Start {}, range {}\n", start, range);
+
+        for(int i=0; i<range; i++) {
+            int64_t key=start+i;
+            key=findVal(key,vSeedSoil);
+            key=findVal(key,vSoilFert);
+            key=findVal(key,vFertWater);
+            key=findVal(key,vWaterLight);
+            key=findVal(key,vLightTemp);
+            key=findVal(key,vTempHumid);
+            key=findVal(key,vHumidLoc);
+            if(key < loc)
+                loc = key;
+        }
+        /*
         fmt::print("Seed {}", key);
         key=findVal(key,vSeedSoil);
         fmt::print(" corresponds to soil {},", key);
@@ -114,6 +134,7 @@ int main(int argc, char** argv) {
         fmt::print(" corresponds to loc {}.\n", key);
         if(key < loc)
             loc = key;
+        */
     }
 
     fmt::print("Shortest is {}.\n", loc);
