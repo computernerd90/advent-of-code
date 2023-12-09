@@ -17,7 +17,7 @@ int64_t findVal(int64_t key, const std::vector<std::tuple<int64_t,int64_t,int64_
         int64_t destStart = std::get<1>(*itr);
         int64_t range = std::get<2>(*itr);
 
-        if(destStart <= key && (destStart + range) >= key)
+        if(destStart <= key && (destStart + range + 1) >= key)
             return srcStart + (key - destStart);
     }
 
@@ -116,25 +116,6 @@ int main(int argc, char** argv) {
             if(key < loc)
                 loc = key;
         }
-        /*
-        fmt::print("Seed {}", key);
-        key=findVal(key,vSeedSoil);
-        fmt::print(" corresponds to soil {},", key);
-        key=findVal(key,vSoilFert);
-        fmt::print(" corresponds to fert {},", key);
-        key=findVal(key,vFertWater);
-        fmt::print(" corresponds to water {},", key);
-        key=findVal(key,vWaterLight);
-        fmt::print(" corresponds to light {},", key);
-        key=findVal(key,vLightTemp);
-        fmt::print(" corresponds to temp {},", key);
-        key=findVal(key,vTempHumid);
-        fmt::print(" corresponds to humid {},", key);
-        key=findVal(key,vHumidLoc);
-        fmt::print(" corresponds to loc {}.\n", key);
-        if(key < loc)
-            loc = key;
-        */
     }
 
     fmt::print("Shortest is {}.\n", loc);
