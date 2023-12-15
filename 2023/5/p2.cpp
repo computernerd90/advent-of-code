@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <atomic>
 #include <map>
 #include <regex>
 #include <string>
@@ -10,6 +11,18 @@
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
 #include <fmt/core.h>
+
+#include "BS_thread_pool.hpp"
+
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vSeedSoil;
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vSoilFert;
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vFertWater;
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vWaterLight;
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vLightTemp;
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vTempHumid;
+std::vector<std::tuple<int64_t,int64_t,int64_t>> vHumidLoc;
+
+std::atomic<int64_t> loc = LLONG_MAX;
 
 int64_t findVal(int64_t key, const std::vector<std::tuple<int64_t,int64_t,int64_t>>& vTuples) {
     for(auto itr=vTuples.begin(), itrEnd=vTuples.end(); itr != itrEnd; ++itr) {
@@ -45,6 +58,23 @@ void parseTuples(FILE* fInput, std::vector<std::tuple<int64_t,int64_t,int64_t>>&
     }
 }
 
+void workerThread(int64_t start, int64_t range) {
+    fmt::print("Start {}, range {}\n", start, range);
+
+    for(int64_t i=0; i<range; i++) {
+        int64_t key=start+i;
+        key=findVal(key,vSeedSoil);
+        key=findVal(key,vSoilFert);
+        key=findVal(key,vFertWater);
+        key=findVal(key,vWaterLight);
+        key=findVal(key,vLightTemp);
+        key=findVal(key,vTempHumid);
+        key=findVal(key,vHumidLoc);
+        if(key < loc)
+            loc = key;
+    }
+}
+
 int main(int argc, char** argv) {
     FILE* fInput = NULL;
     if(argc > 1)
@@ -75,14 +105,6 @@ int main(int argc, char** argv) {
         vSeedRanges.emplace_back(std::make_tuple(start,range));
     }
 
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vSeedSoil;
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vSoilFert;
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vFertWater;
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vWaterLight;
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vLightTemp;
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vTempHumid;
-    std::vector<std::tuple<int64_t,int64_t,int64_t>> vHumidLoc;
-
     parseTuples(fInput, vSeedSoil);
     fgets(line, sizeof(line), fInput);
     parseTuples(fInput, vSoilFert);
@@ -97,28 +119,18 @@ int main(int argc, char** argv) {
     fgets(line, sizeof(line), fInput);
     parseTuples(fInput, vHumidLoc);
 
-    int64_t loc = LLONG_MAX;
+    BS::thread_pool pool(std::thread::hardware_concurrency()-1);
+
     for(auto itr=vSeedRanges.begin(), itrEnd=vSeedRanges.end(); itr != itrEnd; ++itr) {
         int64_t start=std::get<0>(*itr);
         int64_t range=std::get<1>(*itr);
 
-        fmt::print("Start {}, range {}\n", start, range);
-
-        for(int i=0; i<range; i++) {
-            int64_t key=start+i;
-            key=findVal(key,vSeedSoil);
-            key=findVal(key,vSoilFert);
-            key=findVal(key,vFertWater);
-            key=findVal(key,vWaterLight);
-            key=findVal(key,vLightTemp);
-            key=findVal(key,vTempHumid);
-            key=findVal(key,vHumidLoc);
-            if(key < loc)
-                loc = key;
-        }
+        pool.submit(workerThread, start, range);
     }
 
-    fmt::print("Shortest is {}.\n", loc);
+    pool.wait_for_tasks();
+
+    fmt::print("Shortest is {}.\n", int64_t(loc));
 
     return 0;
 }
