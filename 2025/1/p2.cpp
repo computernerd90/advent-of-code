@@ -23,32 +23,33 @@ int main(int argc, char** argv) {
 	int movement;
 
 	while(fscanf(inFile, "%c%d\n", &direction, &movement) != EOF) {
-		//printf("direction: %c, movement: %d, ", direction, movement);
-		while(movement >= 100) {
-			movement -= 100;
-			zeroes++;
-		}
-		switch(direction) { 
+		switch(direction) {
 			case 'L': {
-				pos -= movement;
-				break; }
+				while(movement-- > 0) {
+					pos--;
+					if(pos == 0) {
+						zeroes++;
+					}
+					else if(pos < 0) {
+						pos = 99;
+					}
+				}
+				break;
+			}
 			case 'R': {
-				pos += movement;
-				break; }
+				while(movement-- > 0) {
+					pos++;
+					if(pos == 100) {
+						pos = 0;
+						zeroes++;
+					}
+				}
+				break;
+			}
 			default: {
-				break; }
+				break;
+			}
 		}
-
-		if(pos > 100) {
-			pos -= 100;
-			zeroes++;
-		} else if(pos < 0) {
-			pos += 100;
-			zeroes++;
-		} else
-		//printf("pos: %d\n", pos);
-		if(pos == 0)
-			zeroes++;
 	}
 
 	printf("%d\n",zeroes);
